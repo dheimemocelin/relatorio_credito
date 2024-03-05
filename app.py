@@ -33,7 +33,7 @@ def generate_pdf(data_hora_formatada, razao_social, cnpj, tipo_empresa, abertura
     pdf.add_page()
     pdf.set_font("Arial", size=12)
 
-    # Adiciona os dados da empresa ao PDF
+    # Dados da empresa ao PDF
     pdf.cell(200, 10, txt="Data do Pedido: " + data_hora_formatada, ln=True)
     pdf.cell(200, 10, txt="Razão Social: " + razao_social, ln=True)
     pdf.cell(200, 10, txt="CNPJ: " + cnpj, ln=True)
@@ -67,7 +67,7 @@ def main():
     # Título do formulário
     st.title("Consulta de CNPJ")
     
-    # Obtendo a data e hora atuais
+    # Hora atual
     data_hora_atual = datetime.now()
     # Convertendo para uma string formatada
     data_hora_formatada = data_hora_atual.strftime("%d/%m/%Y")
@@ -86,7 +86,7 @@ def main():
         # Chamada da função e atribuição somente do segundo elemento retornado
         score_indice, valor = calcular_classificacao_e_valor(score)
         
-        # Calcula o media_emprestimo
+        # Calcular a media_emprestimo
         media_emprestimo = total_media * valor
         
         # Botão para enviar o formulário
