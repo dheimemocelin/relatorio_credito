@@ -9,7 +9,7 @@ from fpdf import FPDF
 
 # Função para obter dados da empresa com base no CNPJ
 def get_company_data(cnpj):
-    # URL da API para consultar dados do CNPJ
+    # URL da API
     url = f'https://receitaws.com.br/v1/cnpj/{cnpj}'
     
     try:
@@ -65,7 +65,7 @@ def calcular_classificacao_e_valor(score):
 
 def main():
     # Título do formulário
-    st.title("Consulta de CNPJ")
+    st.title("Relatório Comitê de Crédito")
     
     # Hora atual
     data_hora_atual = datetime.now()
@@ -114,7 +114,7 @@ def main():
                     st.write('Média do Faturamento mensal:', total_media)
                     st.write('SCORE: ', score)
                     st.write('Risco: ', score_indice)
-                    st.write('NOVO Limite Liberado PJ: ',media_emprestimo)
+                    st.write('NOVO Limite Liberado PJ: ', media_emprestimo)
                     
                     
                     # Gera o PDF
@@ -133,6 +133,10 @@ def main():
                     st.error("Não foi possível obter os dados da empresa.")
             else:
                 st.warning("Por favor, insira um CNPJ válido.")
+
+
+
+
 
 if __name__ == "__main__":
     main()
