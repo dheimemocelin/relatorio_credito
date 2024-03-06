@@ -156,12 +156,14 @@ def application():
     # Para Pessoa Física
     st.title("Pessoa Física")
     # Campo de entrada para o CPF
+    nome = st.text_input('Nome')
     cpf = st.text_input("Por favor, insira o CPF (apenas números):")
     qtd_animais = st.text_input('Quantidade de Animais')
 
     if qtd_animais:
         score_indice, valor_liberado = calcular_score_e_risco(qtd_animais)
         
+        st.write(f"Nome: {nome}")
         st.write(f"Índice de risco: {score_indice}")
         st.write(f"Valor liberado: R${valor_liberado}")
 
