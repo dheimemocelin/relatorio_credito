@@ -14,7 +14,7 @@ def get_company_data(cnpj):
     
     try:
         # Fazendo a solicitação GET à API
-        response = requests.get(url)
+        response = requests.get(url, verify=False)
         
         # Verifica se a solicitação foi bem-sucedida (código de status 200)
         if response.status_code == 200:
@@ -28,7 +28,7 @@ def get_company_data(cnpj):
         return None
 
 
-def generate_pdf(data_hora_formatada, razao_social, cnpj, tipo_empresa, abertura, faturamento_mensal_ano_atual, faturamento_mensal_ano_anterior, media_emprestimo, score, score_indice):
+def generate_pdf_empresa(data_hora_formatada, razao_social, cnpj, tipo_empresa, abertura, faturamento_mensal_ano_atual, faturamento_mensal_ano_anterior, media_emprestimo, score, score_indice):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
@@ -50,6 +50,24 @@ def generate_pdf(data_hora_formatada, razao_social, cnpj, tipo_empresa, abertura
     pdf.output(pdf_file_path)
     return pdf_file_path
 
+def generate_pdf_pessoa_fisica(data_hora_formatada, nome, cpf, qtd_animais, score_indice, valor_liberado):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Dados da pessoa física ao PDF
+    pdf.cell(200, 10, txt="Data do Pedido: " + data_hora_formatada, ln=True)
+    pdf.cell(200, 10, txt="Nome: " + nome, ln=True)
+    pdf.cell(200, 10, txt="CPF: " + cpf, ln=True)
+    pdf.cell(200, 10, txt="Quantidade de Animais: " + qtd_animais, ln=True)
+    pdf.cell(200, 10, txt="Índice de risco: " + score_indice, ln=True)
+    pdf.cell(200, 10, txt="Valor liberado: R$ " + str(valor_liberado), ln=True)
+    
+    # Salva o PDF
+    pdf_file_path = "dados_da_pessoa_fisica.pdf"
+    pdf.output(pdf_file_path)
+    return pdf_file_path
+
 
 # Definição da função
 def calcular_classificacao_e_valor(score):
@@ -61,6 +79,28 @@ def calcular_classificacao_e_valor(score):
         return "Médio", 0.3
     else:
         return "Muito Alto", 0
+
+
+# Função para calcular o SCORE e o risco com base na quantidade de animais
+def calcular_score_e_risco(valor_base):
+    if valor_base >= 1000:
+        return "Baixíssimo", 200000
+    elif valor_base >= 501:
+        return "Baixíssimo", 120000
+    elif valor_base >= 301:
+        return "Baixo", 50000
+    elif valor_base >= 200:
+        return "Baixo", 30000
+    elif valor_base >= 101:
+        return "Médio", 20000
+    elif valor_base >= 50:
+        return "Médio", 10000
+    elif valor_base >= 30:
+        return "Alto", 7000
+    elif valor_base >= 10:
+        return "Alto", 5000
+    else:
+        return "Muito Alto", 0.0
 
 
 def main():
@@ -89,8 +129,8 @@ def main():
         # Calcular a media_emprestimo
         media_emprestimo = total_media * valor
         
-        # Botão para enviar o formulário
-        if st.button("Consultar"):
+        # Botão para enviar o formulário de consulta para empresa
+        if st.button("Consultar Empresa"):
             # Verifica se o CNPJ foi inserido
             if cnpj:
                 # Chamada à função para obter dados da empresa
@@ -117,13 +157,13 @@ def main():
                     st.write('NOVO Limite Liberado PJ: ', media_emprestimo)
                     
                     
-                    # Gera o PDF
-                    pdf_file_path = generate_pdf(data_hora_formatada, razao_social, cnpj, tipo_empresa, abertura, faturamento_mensal_ano_atual, faturamento_mensal_ano_anterior, media_emprestimo, score, score_indice)
+                    # Gera o PDF para empresa
+                    pdf_file_path = generate_pdf_empresa(data_hora_formatada, razao_social, cnpj, tipo_empresa, abertura, faturamento_mensal_ano_atual, faturamento_mensal_ano_anterior, media_emprestimo, score, score_indice)
                     
-                    # Cria o botão de download para o PDF
+                    # Cria o botão de download para o PDF da empresa
                     with open(pdf_file_path, "rb") as f:
                         st.download_button(
-                            label="Baixe o PDF",
+                            label="Baixe o PDF - Empresa",
                             data=f,
                             file_name="dados_da_empresa.pdf",
                             mime="application/pdf"
@@ -134,9 +174,37 @@ def main():
             else:
                 st.warning("Por favor, insira um CNPJ válido.")
 
+    # Para Pessoa Física
+    st.title("Pessoa Física")
+    # Campo de entrada para o CPF
+    nome = st.text_input('Nome')
+    cpf = st.text_input("Por favor, insira o CPF (apenas números):")
+    qtd_animais = st.text_input('Quantidade de Animais')
 
+    
+    if qtd_animais:
+        qtd_animais = int(qtd_animais)
+        score_indice, valor_liberado = calcular_score_e_risco(qtd_animais)
+        
+        st.write(f"Nome: {nome}")
+        st.write(f"Índice de risco: {score_indice}")
+        st.write(f"Valor liberado: R${valor_liberado}")
 
-
+        # Botão de gerar PDF para Pessoa Física
+        if st.button("Gerar PDF - Pessoa Física"):
+            if cpf:
+                pdf_file_path = generate_pdf_pessoa_fisica(data_hora_formatada, nome, cpf, qtd_animais, score_indice, valor_liberado)
+                    
+                # Botão de download do PDF para Pessoa Física
+                with open(pdf_file_path, "rb") as f:
+                    st.download_button(
+                        label="Baixe o PDF - Pessoa Física",
+                        data=f,
+                        file_name="dados_da_pessoa_fisica.pdf",
+                        mime="application/pdf"
+                    )
+            else:
+                st.warning("Por favor, insira um CPF válido.")
 
 if __name__ == "__main__":
     main()
